@@ -1,44 +1,29 @@
 const path = require('path');
-const CopyPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const webpack = require('webpack');
 
 module.exports = {
-  mode: 'development',
-  entry: {
-    app: './src/index.js'
-  },
-  devtool: "eval-source-map",
+  entry: './src/index.js',
   output: {
-    filename: '[name].js',
+    filename: 'bundle.js',
     path: path.resolve(__dirname, 'build'),
-  },
-  optimization: {
-    splitChunks: {
-      cacheGroups: {
-        commons: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendor',
-          chunks: 'all'
-        }
-      }
-    }
   },
   module: {
     rules: [
       {
-        test: /\.js$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-        }
-      }
-    ]
-  },
-  devServer: {
-    contentBase: path.resolve(__dirname, 'build'),
-    compress: true,
-    port: 8080,
+        test: /\.(png|jpe?g|gif|svg)$/i,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[path][name].[ext]',
+            },
+          },
+        ],
+      },
+      // other rules...
+    ],
   },
   plugins: [
     new webpack.DefinePlugin({
@@ -46,15 +31,18 @@ module.exports = {
       'WEBGL_RENDERER': JSON.stringify(true)
     }),
     new HtmlWebpackPlugin({
-      template: './index.html'
+      template: './index.html',
+      inject: 'body'
     }),
     new CopyPlugin({
       patterns: [
-        {
-          from: path.resolve(__dirname, 'assets/**/*'),
-          to: path.resolve(__dirname, 'build')
-        }
+        { from: 'assets', to: 'assets' },
       ],
-    })
+    }),
   ],
+  devServer: {
+    static: path.resolve(__dirname, 'build'),
+    compress: true,
+    port: 3000,
+  },
 };
