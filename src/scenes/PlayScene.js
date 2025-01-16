@@ -8,6 +8,7 @@ class PlayScene extends Phaser.Scene{
     this.config = config;
     this.bird = null;
     this.pipes = null;
+ 
     this.pipeVerticalDistanceRange = [150, 250];
     this.pipeHorizontalDistanceRange = [500, 550];
     this.pipeHoriontalDistance = 0;
@@ -30,9 +31,8 @@ create(){
 update(time,delta){
 this.checkGameStatus();
 this.makePipes(time);
-this.gameFunction();
+this.gameFunction(); 
 this.recyclePipes();
-this.increaseScore();
 }
 //start of functions for create
 createBG(){
@@ -95,11 +95,12 @@ checkGameStatus()
  lPipe.body.allowGravity =false;
  uPipe.body.allowGravity =false;
 }
-recyclePipes()
-{
+recyclePipes() {
   const tempPipes = [];
   this.pipes.getChildren().forEach(pipe => {
-    if(pipe.getBounds().right <= 0){
+    // If pipe is off-screen and not yet recycled
+    if (pipe.getBounds().right <= 0 && !pipe.recycled) {
+      pipe.recycled = true; // Mark the pipe as recycled
       tempPipes.push(pipe);
       if(tempPipes.length === 2){
         this.placePipe(...tempPipes);
@@ -108,6 +109,19 @@ recyclePipes()
     }
   });
 }
+
+/*recyclePipes()
+{
+  const tempPipes = [];
+  this.pipes.getChildren().forEach(pipe => {
+    if(pipe.getBounds().right <= 0){
+      pipe.recycled = true;
+      tempPipes.push(pipe);
+      if(tempPipes.length === 2){
+        this.placePipe(...tempPipes);
+      }
+    }  });
+} */
  getRightMostPipe()
  {
   let rightMostX = 0;
@@ -124,6 +138,7 @@ increaseScore(){
  {
  this.physics.pause();
  this.bird.setTint(0xEE4824);
+ this.score = 0;
  this.time.addEvent({
   delay : 1000,
   callback : () => {this.scene.restart();},
